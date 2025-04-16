@@ -1,0 +1,62 @@
+1-Renombrar equipos, donde TipoEquipo será SW, para switch, o R, para router, X será el número del equipo
+hostname TipoEquipoX
+
+2-Establecer GW para la RED A en R1
+interface gig0/0
+ip address 192.168.1.1 255.255.255.0
+description Interfaz GW de RED A
+no shutdown
+exit
+
+3-Crear el pool de direcciones de Red A
+ip dhcp pool RedA
+network 192.168.1.0 255.255.255.0
+default-router 192.168.1.1
+ip dhcp excluded-address 192.168.1.2 192.168.1.5
+
+4-Creación de VLAN´s en SW2
+vlan 5
+name vlan5
+exit
+vlan 10
+nambe vlan10
+exit
+
+5-Establecer puertos para las vlan
+interface range fa0/1-fa0/5
+switchport mode Access
+switchport access vlan 5
+exit
+interface range fa0/6-fa0/10
+switchport mode Access
+switchport access vlan 10
+exit
+
+6-Establecer el puerto troncal
+interface gig0/1
+switchport mode trunk
+switchport trunk allowed vlan 5,10
+exit
+
+7-Establecer las GW dentro R2 en subinterfaces
+interface gig0/0.5
+encapsulation dot1q 5
+ip address 192.168.2.1 255.255.255.128
+description Interfaz GW de vlan 5
+exit
+interface gig0/0.10
+encapsulation dot1q 10
+ip address 192.168.2.129 255.255.255.128
+description Interfaz GW de vlan 10
+exit
+
+8-Creación de pool DHCP en R2
+ip dhcp pool VLAN5
+network 192.168.2.0 255.255.255.128
+default-router 192.168.2.1
+exit
+ip dhcp pool VLAN10
+network 192.168.2.128 255.255.255.128
+default-router 192.168.2.129
+exit
+
